@@ -32,11 +32,11 @@ mkdir $out_dir
 if [ -n "$(ls -A $fast5_dir/barcode* 2>/dev/null)" ]
 then
     pod5-convert-fast5 $fast5_dir/* $out_dir/"$run"_pod5 &> $out_dir/$run.pod5.log
-    dorado basecaller --emit-fastq $model "$run"_pod5 > $out_dir/$run.fastq 2> $out_dir/$run.dorado.log
+    dorado basecaller --emit-fastq $model $out_dir/"$run"_pod5 > $out_dir/$run.fastq 2> $out_dir/$run.dorado.log
     porechop -i $out_dir/$run.fastq -b $out_dir/"$run"_demux --format fastq.gz --threads 20 &> $out_dir/$run.porechop.log
 else
     pod5-convert-fast5 $fast5_dir/* $out_dir/"$run"_pod5 &> $out_dir/$run.pod5.log
-    dorado basecaller --emit-fastq $model "$run"_pod5 > $out_dir/$run.fastq 2> $out_dir/$run.dorado.log
+    dorado basecaller --emit-fastq $model $out_dir/"$run"_pod5 > $out_dir/$run.fastq 2> $out_dir/$run.dorado.log
     porechop -i $out_dir/$run.fastq -o $out_dir/$run.trimmed.fastq.gz --format fastq.gz --threads 20 &> $out_dir/$run.porechop.log
 fi
 
