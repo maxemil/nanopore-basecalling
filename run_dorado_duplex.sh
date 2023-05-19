@@ -52,7 +52,7 @@ while [ : ]; do
         *)
             echo "$1: Unknown option" 1>&2 && exit 1;;
     esac
-
+done
 echo START: `date`;
 echo "Cell:   $FLOWCELL"
 
@@ -66,11 +66,15 @@ model=${models[$FLOWCELL]}
 echo "Model:  $model"
 
 out_dir=$(dirname $SAM)
-run=$(basenae $SAM .sam)
+run=$(basename $SAM .sam)
 
+echo "RUN main duplex basecalling"
 duplex_tools pair --output_dir $out_dir/"$run"_pairs $SAM
 dorado duplex --emit-fastq $model $POD5 --pairs $out_dir/"$run"_pairs/pair_ids_filtered.txt > $out_dir/"$run"_duplex.fastq 2> $out_dir/$run.dorado_duplex.log
 
+echo "RUN additional duplex basecalling on non-split reads"
 duplex_tools split_pairs $SAM $POD5 $out_dir/"$run"_splitduplex
 cat $out_dir/"$run"_splitduplex/*_pair_ids.txt > $out_dir/"$run"_split_duplex_pair_ids.txt
 dorado duplex --emit-fastq $model $out_dir/"$run"_splitduplex/ --pairs $out_dir/"$run"_split_duplex_pair_ids.txt > $out_dir/"$run"_splitduplex.fastq 2> $out_dir/$run.dorado_splitduplex.log
+
+echo END: `date`;

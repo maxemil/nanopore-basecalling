@@ -33,7 +33,7 @@ if [ -n "$(ls -A $fast5_dir/barcode* 2>/dev/null)" ]
 then
     for barcode_dir in $fast5_dir/barcode* 
     do
-        barcode_base=$(basenae barcode_dir)
+        barcode_base=$(basename barcode_dir)
         pod5-convert-fast5 $barcode_dir/* $out_dir/"$run"_"$barcode_base"_pod5 &> $out_dir/"$run"_"$barcode_base".pod5.log
         dorado basecaller --emit-moves $model $out_dir/"$run"_"$barcode_base"_pod5 > $out_dir/"$run"_"$barcode_base".sam 2> $out_dir/"$run"_"$barcode_base".dorado.log
         samtools fastq -@ 20 $out_dir/"$run"_"$barcode_base".sam > $out_dir/"$run"_"$barcode_base".fastq
