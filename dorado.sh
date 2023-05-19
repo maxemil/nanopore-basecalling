@@ -34,13 +34,13 @@ then
     for barcode_dir in $fast5_dir/barcode* 
     do
         barcode_base=$(basename barcode_dir)
-        pod5-convert-fast5 $barcode_dir/* $out_dir/"$run"_"$barcode_base"_pod5 &> $out_dir/"$run"_"$barcode_base".pod5.log
+        pod5 convert fast5 $barcode_dir/* --output $out_dir/"$run"_"$barcode_base"_pod5/"$run"_"$barcode_base".pod5 &> $out_dir/"$run"_"$barcode_base".pod5.log
         dorado basecaller --emit-moves $model $out_dir/"$run"_"$barcode_base"_pod5 > $out_dir/"$run"_"$barcode_base".sam 2> $out_dir/"$run"_"$barcode_base".dorado.log
         samtools fastq -@ 20 $out_dir/"$run"_"$barcode_base".sam > $out_dir/"$run"_"$barcode_base".fastq
         porechop -i $out_dir/"$run"_"$barcode_base".fastq -o $out_dir/"$run"_"$barcode_base".trimmed.fastq.gz --format fastq.gz --threads 20 &> $out_dir/"$run"_"$barcode_base".porechop.log &
     done
 else
-    pod5-convert-fast5 $fast5_dir/* $out_dir/"$run"_pod5 &> $out_dir/$run.pod5.log
+    pod5 convert fast5 $fast5_dir/* --output $out_dir/"$run"_pod5/"$run".pod5 &> $out_dir/$run.pod5.log
     dorado basecaller --emit-moves $model $out_dir/"$run"_pod5 > $out_dir/$run.sam 2> $out_dir/$run.dorado.log
     samtools fastq -@ 15 $out_dir/$run.sam > $out_dir/$run.fastq
     porechop -i $out_dir/$run.fastq -o $out_dir/$run.trimmed.fastq.gz --format fastq.gz --threads 20 &> $out_dir/$run.porechop.log
