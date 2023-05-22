@@ -5,10 +5,10 @@ set -e
 usage(){
 cat <<EOF
 Usage:
-  run_dorado_duplex.sh -p POD5 -f FLOWCELL -s SAM
+  run_dorado_duplex.sh -p POD5 -f FLOWCELL -s BAM
 run prodigal on genome.
   -p folder containing pod5 file(s)
-  -s simplex basecalled sam file with moves
+  -b simplex basecalled bam file with moves
   -f FLOWCELL model, eg. FLO-MIN114
   -h  show this help
 EOF
@@ -19,8 +19,8 @@ exit 0;
 [[ $# -eq 0 ]] && usage;
 
 # Execute getopt
-ARGS=`getopt --name "run_pilon.sh" \
-    --options "p:s:f:h" \
+ARGS=`getopt --name "run_dorado_duplex.sh" \
+    --options "p:b:f:h" \
     -- "$@"`
 echo $@
 #Bad arguments
@@ -36,9 +36,9 @@ while [ : ]; do
             [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
             POD5="$2";
             shift 2;;
-        -s)
+        -b)
             [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
-            SAM="$2";
+            BAM="$2";
             shift 2;;
         -f)
             [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
@@ -62,19 +62,21 @@ declare -A models=(
     ["FLO-MIN111"]="dna_r10.3@v3.3"
     ["FLO-MIN112"]="dna_r10.4_e8.1_sup@v3.4"
     ["FLO-MIN114"]="dna_r10.4.1_e8.2_400bps_sup@v4.1.0")
-model=${models[$FLOWCELL]}
+model=/nfs/bmm/crov/mschoen/databases/dorado_models/${models[$FLOWCELL]}
 echo "Model:  $model"
 
-out_dir=$(dirname $SAM)
-run=$(basename $SAM .sam)
+out_dir=$(dirname $BAM)
+run=$(basename $BAM .bam)
 
 echo "RUN main duplex basecalling"
-duplex_tools pair --output_dir $out_dir/"$run"_pairs $SAM
-dorado duplex --emit-fastq $model $POD5 --pairs $out_dir/"$run"_pairs/pair_ids_filtered.txt > $out_dir/"$run"_duplex.fastq 2> $out_dir/$run.dorado_duplex.log
+duplex_tools pair --output_dir $out_dir/"$run"_pairs $BAM
+dorado duplex --emit-fastq $model $POD5 --pairs $out_dir/"$run"_pairs/pair_ids_filtered.txt 2> \
+        $out_dir/$run.dorado_duplex.log | pigz > $out_dir/"$run"_duplex.fastq.gz
 
 echo "RUN additional duplex basecalling on non-split reads"
-duplex_tools split_pairs $SAM $POD5 $out_dir/"$run"_splitduplex
+duplex_tools split_pairs $BAM $POD5 $out_dir/"$run"_splitduplex
 cat $out_dir/"$run"_splitduplex/*_pair_ids.txt > $out_dir/"$run"_split_duplex_pair_ids.txt
-dorado duplex --emit-fastq $model $out_dir/"$run"_splitduplex/ --pairs $out_dir/"$run"_split_duplex_pair_ids.txt > $out_dir/"$run"_splitduplex.fastq 2> $out_dir/$run.dorado_splitduplex.log
+dorado duplex --emit-fastq $model $out_dir/"$run"_splitduplex/ --pairs $out_dir/"$run"_split_duplex_pair_ids.txt 2> \
+        $out_dir/$run.dorado_splitduplex.log | pigz > $out_dir/"$run"_splitduplex.fastq
 
 echo END: `date`;
