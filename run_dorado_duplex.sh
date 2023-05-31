@@ -72,11 +72,14 @@ echo "RUN main duplex basecalling"
 duplex_tools pair --output_dir $out_dir/"$run"_pairs $BAM
 dorado duplex --emit-fastq $model $POD5 --pairs $out_dir/"$run"_pairs/pair_ids_filtered.txt 2> \
         $out_dir/$run.dorado_duplex.log | pigz > $out_dir/"$run"_duplex.fastq.gz
+porechop -i $out_dir/"$run"_duplex.fastq.gz -o $out_dir/"$run"_duplex.trimmed.fastq.gz --format fastq.gz \ 
+            --threads 20 &> $out_dir/"$run"_duplex.porechop.log
 
 echo "RUN additional duplex basecalling on non-split reads"
 duplex_tools split_pairs $BAM $POD5 $out_dir/"$run"_splitduplex
 cat $out_dir/"$run"_splitduplex/*_pair_ids.txt > $out_dir/"$run"_split_duplex_pair_ids.txt
 dorado duplex --emit-fastq $model $out_dir/"$run"_splitduplex/ --pairs $out_dir/"$run"_split_duplex_pair_ids.txt 2> \
-        $out_dir/$run.dorado_splitduplex.log | pigz > $out_dir/"$run"_splitduplex.fastq
-
+        $out_dir/$run.dorado_splitduplex.log | pigz > $out_dir/"$run"_splitduplex.fastq.gz
+porechop -i $out_dir/"$run"_splitduplex.fastq.gz -o $out_dir/"$run"_splitduplex.trimmed.fastq.gz --format fastq.gz \ 
+            --threads 20 &> $out_dir/"$run"_splitduplex.porechop.log
 echo END: `date`;

@@ -39,6 +39,7 @@ then
         dorado basecaller --emit-moves $model $out_dir/"$run"_"$barcode_base"_pod5 \
                 2> $out_dir/"$run"_"$barcode_base".dorado.log | \
                 samtools view -b -o $out_dir/"$run"_"$barcode_base".bam -@ 20 -
+        samtools index -@ 20 $out_dir/"$run"_"$barcode_base".bam
         samtools fastq -@ 20 $out_dir/"$run"_"$barcode_base".bam | pigz > $out_dir/"$run"_"$barcode_base".fastq.gz
         porechop -i $out_dir/"$run"_"$barcode_base".fastq.gz -o $out_dir/"$run"_"$barcode_base".trimmed.fastq.gz \
                 --format fastq.gz --threads 20 &> $out_dir/"$run"_"$barcode_base".porechop.log &
@@ -48,6 +49,7 @@ else
     dorado basecaller --emit-moves $model $out_dir/"$run"_pod5 \
                 2> $out_dir/$run.dorado.log | \
                 samtools view -b -o $out_dir/$run.bam  -@ 20 -
+    samtools index -@ 20 $out_dir/$run.bam
     samtools fastq -@ 20 $out_dir/$run.bam | pigz > $out_dir/$run.fastq.gz
     porechop -i $out_dir/$run.fastq.gz -o $out_dir/$run.trimmed.fastq.gz --format fastq.gz \
             --threads 20 &> $out_dir/$run.porechop.log
