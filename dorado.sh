@@ -24,19 +24,20 @@ echo "Model:  $model"
 
 # run 
 # bonito basecaller $model
-fast5_dir=$(dirname $report)/fast5_pass
+# fast5_dir=$(dirname $report)/fast5_pass
+pod5_dir=$(dirname $report)/pod5_pass
 out_dir=$(basename $run_dir)
 
 mkdir $out_dir
 
-if [ -n "$(ls -A $fast5_dir/barcode* 2>/dev/null)" ]
+if [ -n "$(ls -A $pod5_dir/barcode* 2>/dev/null)" ]
 then
-    for barcode_dir in $fast5_dir/barcode* 
+    for barcode_dir in $pod5_dir/barcode* 
     do
         barcode_base=$(basename $barcode_dir)
-        pod5 convert fast5 $barcode_dir/* --output $out_dir/"$run"_"$barcode_base"_pod5/"$run"_"$barcode_base".pod5 &> \
-                $out_dir/"$run"_"$barcode_base".pod5.log
-        dorado basecaller --emit-moves $model $out_dir/"$run"_"$barcode_base"_pod5 \
+        # pod5 convert fast5 $barcode_dir/* --output $out_dir/"$run"_"$barcode_base"_pod5/"$run"_"$barcode_base".pod5 &> \
+        #         $out_dir/"$run"_"$barcode_base".pod5.log
+        dorado basecaller --emit-moves $model $pod5_dir \
                 2> $out_dir/"$run"_"$barcode_base".dorado.log | \
                 samtools view -b -o $out_dir/"$run"_"$barcode_base".bam -@ 20 -
         samtools index -@ 20 $out_dir/"$run"_"$barcode_base".bam
@@ -45,8 +46,8 @@ then
                 --format fastq.gz --threads 20 &> $out_dir/"$run"_"$barcode_base".porechop.log &
     done
 else
-    pod5 convert fast5 $fast5_dir/* --output $out_dir/"$run"_pod5/"$run".pod5 &> $out_dir/$run.pod5.log
-    dorado basecaller --emit-moves $model $out_dir/"$run"_pod5 \
+    # pod5 convert fast5 $fast5_dir/* --output $out_dir/"$run"_pod5/"$run".pod5 &> $out_dir/$run.pod5.log
+    dorado basecaller --emit-moves $model $pod5_dir \
                 2> $out_dir/$run.dorado.log | \
                 samtools view -b -o $out_dir/$run.bam  -@ 20 -
     samtools index -@ 20 $out_dir/$run.bam
