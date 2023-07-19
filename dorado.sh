@@ -18,7 +18,7 @@ declare -A models=(
     ["FLO-MIN106"]="dna_r9.4.1_e8_sup@v3.3"
     ["FLO-MIN111"]="dna_r10.3@v3.3"
     ["FLO-MIN112"]="dna_r10.4_e8.1_sup@v3.4"
-    ["FLO-MIN114"]="dna_r10.4.1_e8.2_400bps_sup@v4.1.0")
+    ["FLO-MIN114"]="dna_r10.4.1_e8.2_400bps_sup@v4.2.0")
 model=${models[$cell]}
 echo "Model:  $model"
 
@@ -37,13 +37,26 @@ then
         barcode_base=$(basename $barcode_dir)
         # pod5 convert fast5 $barcode_dir/* --output $out_dir/"$run"_"$barcode_base"_pod5/"$run"_"$barcode_base".pod5 &> \
         #         $out_dir/"$run"_"$barcode_base".pod5.log
-        dorado basecaller --emit-moves $model $pod5_dir \
-                2> $out_dir/"$run"_"$barcode_base".dorado.log | \
-                samtools view -b -o $out_dir/"$run"_"$barcode_base".bam -@ 20 -
-        samtools index -@ 20 $out_dir/"$run"_"$barcode_base".bam
-        samtools fastq -@ 20 $out_dir/"$run"_"$barcode_base".bam | pigz > $out_dir/"$run"_"$barcode_base".fastq.gz
-        porechop -i $out_dir/"$run"_"$barcode_base".fastq.gz -o $out_dir/"$run"_"$barcode_base".trimmed.fastq.gz \
-                --format fastq.gz --threads 20 &> $out_dir/"$run"_"$barcode_base".porechop.log &
+        #dorado basecaller --emit-moves $model $barcode_dir \
+        #        2> $out_dir/"$run"_"$barcode_base".dorado.log | \
+        #        samtools view -b -o $out_dir/"$run"_"$barcode_base".bam -@ 20 -
+        #samtools index -@ 20 $out_dir/"$run"_"$barcode_base".bam
+        #samtools fastq -@ 20 $out_dir/"$run"_"$barcode_base".bam | pigz > $out_dir/"$run"_"$barcode_base".fastq.gz
+        #porechop -i $out_dir/"$run"_"$barcode_base".fastq.gz -o $out_dir/"$run"_"$barcode_base".trimmed.fastq.gz \
+        #        --format fastq.gz --threads 20 &> $out_dir/"$run"_"$barcode_base".porechop.log &
+        dorado duplex $model $barcode_dir 2> $out_dir/"$run"_"$barcode_base".dorado.log > $out_dir/"$run"_"$barcode_base".bam
+        if [[ $(samtools quickcheck $out_dir/"$run"_"$barcode_base".bam) -eq 0 ]]; 
+        then 
+            samtools view -O fastq -d dx:0 $out_dir/"$run"_"$barcode_base".bam | pigz > $out_dir/"$run"_"$barcode_base".simplex.fastq.gz
+            samtools view -O fastq -d dx:1 $out_dir/"$run"_"$barcode_base".bam | pigz > $out_dir/"$run"_"$barcode_base".duplex.fastq.gz
+
+            porechop -i $out_dir/"$run"_"$barcode_base".simplex.fastq.gz -o $out_dir/"$run"_"$barcode_base".simplex.trimmed.fastq.gz \
+                            --format fastq.gz --threads 20 &> $out_dir/"$run"_"$barcode_base".simplex.porechop.log
+            porechop -i $out_dir/"$run"_"$barcode_base".duplex.fastq.gz -o $out_dir/"$run"_"$barcode_base".duplex.trimmed.fastq.gz \
+                            --format fastq.gz --threads 20 &> $out_dir/"$run"_"$barcode_base".duplex.porechop.log 
+        else 
+            echo 'no data found'; 
+        fi
     done
 else
     # pod5 convert fast5 $fast5_dir/* --output $out_dir/"$run"_pod5/"$run".pod5 &> $out_dir/$run.pod5.log
