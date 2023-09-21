@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 ## subs
 usage(){
@@ -42,16 +41,13 @@ while [ : ]; do
             run_dir="$2";
             shift 2;;
         -c)
-            [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
             cell="$2";
             shift 2;;
         -m)
-            [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
             model="$2";
             shift 2;;
         -p)
-            [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
-            [[ "$2" != 'pod5' && "$2" != 'fast5' ]] && (echo "$1: only pod5 or fast5 allowed" 1>&2 && exit 1);
+            [ -n "$2" ] && [[ "$2" != 'pod5' && "$2" != 'fast5' ]] && (echo "$1: only pod5 or fast5 allowed" 1>&2 && exit 1);
             raw_format="$2";
             shift 2;;
         -h)
@@ -70,7 +66,7 @@ report=$(find $run_dir -name "report_*.md")
 [ -z "$report" ] && { echo "Couldn't find report_*.md for $run at "$(dirname $run_dir); exit 1; };
 echo "Report: $report"
 
-[ -z "$cell" ] && cell=$(grep "flow_cell_product_code" $report | grep -oP "FLO-MIN\d+");
+[ -z ${cell+set} ] && cell=$(grep "flow_cell_product_code" $report | grep -oP "FLO-MIN\d+");
 echo "Cell:   $cell"
 
 # select model
@@ -79,13 +75,18 @@ declare -A models=(
     ["FLO-MIN111"]="dna_r10.3@v3.3"
     ["FLO-MIN112"]="dna_r10.4_e8.1_sup@v3.4"
     ["FLO-MIN114"]="dna_r10.4.1_e8.2_400bps_sup@v4.2.0")
-[ -z "$model" ] && model=${models[$cell]}
+[ -z ${model+set} ] && model=${models[$cell]}
 echo "Model:  $model"
 
 pod5_dir=$(dirname $report)/"$raw_format"_pass
 out_dir=$(basename $run_dir)
-
 mkdir -p $out_dir
+
+if [ $raw_format == 'fast5' ] ;
+then 
+    pod5 convert fast5 $pod5_dir -O $pod5_dir --threads 20 -r -o $out_dir/pod5_pass
+    pod5_dir=$out_dir/pod5_pass
+fi
 
 if [ -n "$(ls -A $pod5_dir/barcode* 2>/dev/null)" ]
 then
