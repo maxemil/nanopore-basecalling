@@ -78,14 +78,15 @@ declare -A models=(
 [ -z ${model+set} ] && model=${models[$cell]}
 echo "Model:  $model"
 
-pod5_dir=$(dirname $report)/"$raw_format"_pass
 out_dir=$(basename $run_dir)
-mkdir -p $out_dir
+mkdir -p $out_dir/$raw_format
+pod5_dir=$out_dir/$raw_format
+cp $(dirname $report)/"$raw_format"* $pod5_dir
 
 if [ $raw_format == 'fast5' ] ;
 then 
-    pod5 convert fast5 $pod5_dir -O $pod5_dir --threads 20 -r -o $out_dir/pod5_pass
-    pod5_dir=$out_dir/pod5_pass
+    pod5 convert fast5 $pod5_dir -O $pod5_dir --threads 20 -r -o $out_dir/pod5
+    pod5_dir=$out_dir/pod5
 fi
 
 if [ -n "$(ls -A $pod5_dir/barcode* 2>/dev/null)" ]
