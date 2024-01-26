@@ -81,7 +81,7 @@ echo "Model:  $model"
 out_dir=$(basename $run_dir)
 mkdir -p $out_dir/$raw_format
 pod5_dir=$out_dir/$raw_format
-cp $(dirname $report)/"$raw_format"* $pod5_dir
+cp $(dirname $report)/"$raw_format"*/* $pod5_dir
 
 if [ $raw_format == 'fast5' ] ;
 then 
