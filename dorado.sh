@@ -71,11 +71,11 @@ echo "Cell:   $cell"
 
 # select model
 declare -A models=(
-    ["FLO-MIN106"]="dna_r9.4.1_e8_sup@v3.6"
+    ["FLO-MIN106"]="sup@v3.6"
     ["FLO-MIN111"]="dna_r10.3@v3.3"
-    ["FLO-MIN112"]="dna_r10.4_e8.1_sup@v3.4"
-    ["FLO-MIN114"]="dna_r10.4.1_e8.2_400bps_sup@v4.3.0")
-[ -z ${model+set} ] && model=${models[$cell]}
+    ["FLO-MIN112"]="sup@v3.4"
+    ["FLO-MIN114"]="sup@vlatest")
+[ -z ${model+set} ] && model=${models[$cell]} 
 echo "Model:  $model"
 
 out_dir=$(basename $run_dir)
