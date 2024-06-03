@@ -74,7 +74,7 @@ declare -A models=(
     ["FLO-MIN106"]="sup@v3.6"
     ["FLO-MIN111"]="dna_r10.3@v3.3"
     ["FLO-MIN112"]="sup@v3.4"
-    ["FLO-MIN114"]="sup@vlatest")
+    ["FLO-MIN114"]="sup@latest")
 [ -z ${model+set} ] && model=${models[$cell]} 
 echo "Model:  $model"
 
