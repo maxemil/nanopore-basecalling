@@ -85,7 +85,7 @@ echo "Model:  $model"
 out_dir=$(basename $run_dir)
 mkdir -p $out_dir/$raw_format
 pod5_dir=$out_dir/$raw_format
-cp $(dirname $report)/"$raw_format"*/* $pod5_dir
+rsync -avh --update $(dirname $report)/"$raw_format"*/* $pod5_dir
 
 if [ $raw_format == 'fast5' ] ;
 then 
@@ -113,7 +113,7 @@ then
         fi
     done
 else
-    echo dorado duplex $model $pod5_dir $dorado_options 2> $out_dir/$run.dorado.log > $out_dir/$run.bam
+    dorado duplex $model $pod5_dir $dorado_options 2> $out_dir/$run.dorado.log > $out_dir/$run.bam
     samtools view -O fastq -d dx:0 $out_dir/"$run".bam | pigz > $out_dir/"$run".simplex.fastq.gz
     samtools view -O fastq -d dx:1 $out_dir/"$run".bam | pigz > $out_dir/"$run".duplex.fastq.gz
     porechop -i $out_dir/"$run".simplex.fastq.gz -o $out_dir/"$run".simplex.trimmed.fastq.gz \
