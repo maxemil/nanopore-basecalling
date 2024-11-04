@@ -8,6 +8,7 @@ Usage:
 run dorado basecalling.
   -d  Base directory from the MinIon 
   -c  cell (e.g. FLO-MIN114)
+  -o  furhter options (such as "--device cuda:0")
   -m  model (e.g. dna_r10.4.1_e8.2_400bps_sup@v4.2.0)
   -p  pod5 or fast5, default pod5
   -h  show this help
@@ -22,7 +23,7 @@ echo START: `date`;
 
 # Execute getopt
 ARGS=`getopt --name "dorado.sh" \
-    --options "d:c:m:p:h" \
+    --options "d:c:o:m:p:h" \
     -- "$@"`
 echo $@
 #Bad arguments
@@ -42,6 +43,9 @@ while [ : ]; do
             shift 2;;
         -c)
             cell="$2";
+            shift 2;;
+        -o)
+            dorado_options="$2";
             shift 2;;
         -m)
             model="$2";
@@ -109,7 +113,7 @@ then
         fi
     done
 else
-    dorado duplex $model $pod5_dir 2> $out_dir/$run.dorado.log > $out_dir/$run.bam
+    echo dorado duplex $model $pod5_dir $dorado_options 2> $out_dir/$run.dorado.log > $out_dir/$run.bam
     samtools view -O fastq -d dx:0 $out_dir/"$run".bam | pigz > $out_dir/"$run".simplex.fastq.gz
     samtools view -O fastq -d dx:1 $out_dir/"$run".bam | pigz > $out_dir/"$run".duplex.fastq.gz
     porechop -i $out_dir/"$run".simplex.fastq.gz -o $out_dir/"$run".simplex.trimmed.fastq.gz \
