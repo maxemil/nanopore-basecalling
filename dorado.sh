@@ -85,7 +85,7 @@ echo "Model:  $model"
 out_dir=$(basename $run_dir)
 mkdir -p $out_dir/$raw_format
 pod5_dir=$out_dir/$raw_format
-rsync -avh --update $(dirname $report)/"$raw_format"*/* $pod5_dir
+rsync -ah --update $(dirname $report)/"$raw_format"*/* $pod5_dir
 
 if [ $raw_format == 'fast5' ] ;
 then 
