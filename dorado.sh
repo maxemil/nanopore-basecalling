@@ -98,7 +98,7 @@ then
     for barcode_dir in $pod5_dir/barcode* 
     do
         barcode_base=$(basename $barcode_dir)
-        dorado duplex $model $barcode_dir 2> $out_dir/"$run"_"$barcode_base".dorado.log > $out_dir/"$run"_"$barcode_base".bam
+        dorado duplex -v $model $barcode_dir 2> $out_dir/"$run"_"$barcode_base".dorado.log > $out_dir/"$run"_"$barcode_base".bam
         if [[ $(samtools quickcheck $out_dir/"$run"_"$barcode_base".bam) -eq 0 ]]; 
         then 
             samtools view -O fastq -d dx:0 $out_dir/"$run"_"$barcode_base".bam | pigz > $out_dir/"$run"_"$barcode_base".simplex.fastq.gz
@@ -113,7 +113,7 @@ then
         fi
     done
 else
-    dorado duplex $model $pod5_dir $dorado_options 2> $out_dir/$run.dorado.log > $out_dir/$run.bam
+    dorado duplex -v $model $pod5_dir $dorado_options 2> $out_dir/$run.dorado.log > $out_dir/$run.bam
     samtools view -O fastq -d dx:0 $out_dir/"$run".bam | pigz > $out_dir/"$run".simplex.fastq.gz
     samtools view -O fastq -d dx:1 $out_dir/"$run".bam | pigz > $out_dir/"$run".duplex.fastq.gz
     porechop -i $out_dir/"$run".simplex.fastq.gz -o $out_dir/"$run".simplex.trimmed.fastq.gz \
