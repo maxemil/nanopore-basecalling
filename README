@@ -1,0 +1,13 @@
+The main file here is dorado.sh, which is a wrapper around dorado that rsyncs the pod5 files from the project folder to a local (e.g. scratch) and performs duplex basecalling. `dorado.sh <Project base>` will usually work, selecting the latest model by default. Sometimes the `report.md` file is missing the cell ID, then that needs to be added mannually with `-c`.
+
+```
+Usage:
+  dorado.sh
+run dorado basecalling.
+  -d  Base directory from the MinIon 
+  -c  cell (e.g. FLO-MIN114)
+  -o  furhter options (such as "--device cuda:0")
+  -m  model (e.g. dna_r10.4.1_e8.2_400bps_sup@v4.2.0)
+  -p  pod5 or fast5, default pod5
+  -h  show this help
+```
