@@ -10,7 +10,8 @@ run dorado basecalling.
   -c  cell (e.g. FLO-MIN114)
   -m  model (e.g. dna_r10.4.1_e8.2_400bps_sup@v4.2.0)
   -p  pod5 or fast5, default pod5
-  -o  modification, eg. 4mC_5mC,6mA
+  -o  furhter options (such as "--device cuda:0")
+  -y  modification, eg. 4mC_5mC,6mA
   -h  show this help
 EOF
 exit 0;
@@ -23,7 +24,7 @@ echo START: `date`;
 
 # Execute getopt
 ARGS=`getopt --name "dorado.sh" \
-    --options "d:c:m:p:o:h" \
+    --options "d:c:m:p:o:y:h" \
     -- "$@"`
 echo $@
 #Bad argumentscd
@@ -52,6 +53,9 @@ while [ : ]; do
             raw_format="$2";
             shift 2;;
         -o)
+            dorado_options="$2";
+            shift 2;;
+        -y)
             [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
             mod="$2";
             shift 2;;
@@ -79,9 +83,6 @@ declare -A models=(
     ["FLO-MIN114"]="sup@latest")
 [ -z ${model+set} ] && model=${models[$cell]} 
 echo "Model:  $model"
-
-echo "Reference:    $reference"
-refbase=$(basename ${reference%.f*})
 
 out_dir=$(basename $run_dir)_mod
 mkdir -p $out_dir/$raw_format
