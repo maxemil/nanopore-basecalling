@@ -11,7 +11,6 @@ run dorado basecalling.
   -m  model (e.g. dna_r10.4.1_e8.2_400bps_sup@v4.2.0)
   -p  pod5 or fast5, default pod5
   -o  modification, eg. 4mC_5mC,6mA
-  -f  fasta reference
   -h  show this help
 EOF
 exit 0;
@@ -24,7 +23,7 @@ echo START: `date`;
 
 # Execute getopt
 ARGS=`getopt --name "dorado.sh" \
-    --options "d:c:m:p:o:f:h" \
+    --options "d:c:m:p:o:h" \
     -- "$@"`
 echo $@
 #Bad argumentscd
@@ -55,10 +54,6 @@ while [ : ]; do
         -o)
             [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
             mod="$2";
-            shift 2;;
-        -f)
-            [ ! -n "$2" ] && (echo "$1: value required" 1>&2 && exit 1);
-            reference="$2";
             shift 2;;
         -h)
 	    usage && exit 0;;
