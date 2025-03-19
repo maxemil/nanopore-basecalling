@@ -93,7 +93,8 @@ mkdir -p $out_dir/$raw_format
 pod5_dir=$out_dir/$raw_format
 rsync -ah --update $(dirname $report)/"$raw_format"*/* $pod5_dir
 
-dorado basecaller "$model",$mod $pod5_dir --device cuda:0 --models-directory /data/mschoen/models/ 2> $out_dir/$run.dorado.log | samtools view -F 3584 -u -S -@ 20 - | samtools sort -@ 20 -o $out_dir/"$run"_mod.bam
+dorado -vv 2> $out_dir/$run.dorado.log
+dorado basecaller -v "$model",$mod $pod5_dir --models-directory /data/mschoen/models/ $dorado_options 2>> $out_dir/$run.dorado.log | samtools view -F 3584 -u -S -@ 20 - | samtools sort -@ 20 -o $out_dir/"$run"_mod.bam
 # dorado basecaller "$model",$mod $pod5_dir --reference $reference 2> $out_dir/$run.dorado.log | samtools view -F 3584 -u -S -@ 10 - | samtools sort -@ 30 -o $out_dir/"$refbase"_mod.bam
 # dorado aligner $reference $out_dir/"$run"_mod.bam | samtools view -F 3588 -u -S -@ 10 - | samtools sort -@ 30 -o $out_dir/"$refbase"_mod.bam
 samtools index  $out_dir/"$run"_mod.bam
