@@ -27,7 +27,7 @@ ARGS=`getopt --name "dorado.sh" \
     --options "d:c:m:p:o:f:h" \
     -- "$@"`
 echo $@
-#Bad arguments
+#Bad argumentscd
 [ $? -ne 0 ] && exit 1;
 
 # A little magic
@@ -91,12 +91,13 @@ refbase=$(basename ${reference%.f*})
 out_dir=$(basename $run_dir)_mod
 mkdir -p $out_dir/$raw_format
 pod5_dir=$out_dir/$raw_format
-cp $(dirname $report)/"$raw_format"*/* $pod5_dir
+rsync -ah --update $(dirname $report)/"$raw_format"*/* $pod5_dir
 
-dorado basecaller "$model",$mod $pod5_dir --reference $reference 2> $out_dir/$run.dorado.log | samtools view -F 3588 -u -S -@ 10 - | samtools sort -@ 30 -o $out_dir/"$refbase"_mod.bam
+dorado basecaller "$model",$mod $pod5_dir --device cuda:0 --models-directory /data/mschoen/models/ 2> $out_dir/$run.dorado.log | samtools view -F 3584 -u -S -@ 20 - | samtools sort -@ 20 -o $out_dir/"$run"_mod.bam
+# dorado basecaller "$model",$mod $pod5_dir --reference $reference 2> $out_dir/$run.dorado.log | samtools view -F 3584 -u -S -@ 10 - | samtools sort -@ 30 -o $out_dir/"$refbase"_mod.bam
 # dorado aligner $reference $out_dir/"$run"_mod.bam | samtools view -F 3588 -u -S -@ 10 - | samtools sort -@ 30 -o $out_dir/"$refbase"_mod.bam
-samtools index $out_dir/"$refbase"_mod.bam
-modkit pileup --filter-threshold 0.6 --only-tabs $out_dir/"$refbase"_mod.bam $out_dir/"$refbase"_mod.bed
+samtools index  $out_dir/"$run"_mod.bam
+# modkit pileup --filter-threshold 0.6 --only-tabs $out_dir/"$refbase"_mod.bam $out_dir/"$refbase"_mod.bed
 
 wait
 echo END: `date`;
